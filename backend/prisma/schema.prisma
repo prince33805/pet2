@@ -1,0 +1,211 @@
+generator client {
+    provider      = "prisma-client-js"
+    // binaryTargets = ["native", "darwin-arm64", "linux-arm64-openssl-3.0.x"]
+    binaryTargets = ["native", "linux-musl"]
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Customer {
+    id             String  @id @default(uuid())
+    fullname       String
+    username       String  @unique
+    password       String
+    phone          String  @unique
+    email          String? @unique
+    address        String?
+    membershipTier String  @default("basic")
+    totalPoints    Float   @default(0)
+
+    pets        Pet[]
+    reviews     Review[]
+    appointment Appointment[]
+
+    createdAt DateTime @default(now())
+    createdBy String?
+    updatedAt DateTime @updatedAt
+    updatedBy String?
+}
+
+model Pet {
+    id          String  @id @default(uuid())
+    customerId  String
+    name        String
+    species     String
+    breed       String
+    gender      Gender  @default(MALE)
+    age         String
+    weight      Float
+    healthNotes String?
+
+    customer     Customer      @relation(fields: [customerId], references: [id])
+    appointments Appointment[]
+
+    createdAt DateTime @default(now())
+    createdBy String?
+    updatedAt DateTime @updatedAt
+    updatedBy String?
+}
+
+enum Gender {
+    MALE
+    FEMALE
+}
+
+model Service {
+    id          String  @id @default(uuid())
+    name        String
+    description String?
+    duration    String
+    price       Float
+
+    options            Option[]
+    appointmentService AppointmentService[]
+
+    createdAt DateTime @default(now())
+    createdBy String?
+    updatedAt DateTime @updatedAt
+    updatedBy String?
+}
+
+model Option {
+    id          String  @id @default(uuid())
+    name        String
+    description String?
+    price       Float
+
+    serviceId String
+    service   Service @relation(fields: [serviceId], references: [id])
+
+    AppointmentServiceOption AppointmentServiceOption[]
+
+    createdAt DateTime @default(now())
+    createdBy String?
+    updatedAt DateTime @updatedAt
+    updatedBy String?
+}
+
+enum BookingStatus {
+    SCHEDULED
+    CONFIRMED
+    COMPLETED
+    CANCELED
+}
+
+model Appointment {
+    id         String        @id @default(uuid())
+    customerId String
+    petId      String
+    staffId    String?
+    dateTime   DateTime
+    status     BookingStatus @default(SCHEDULED)
+
+    customer Customer @relation(fields: [customerId], references: [id])
+    pet      Pet      @relation(fields: [petId], references: [id])
+    staff    Staff?   @relation(fields: [staffId], references: [id])
+
+    appointmentService AppointmentService[]
+    order              Order?
+    review             Review?
+
+    createdAt DateTime @default(now())
+    createdBy String?
+    updatedAt DateTime @updatedAt
+    updatedBy String?
+}
+
+model AppointmentService {
+    id            String      @id @default(uuid())
+    appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+    appointmentId String
+
+    service   Service @relation(fields: [serviceId], references: [id])
+    serviceId String
+
+    appointmentServiceOption AppointmentServiceOption[]
+
+    createdAt DateTime @default(now())
+    createdBy String?
+    updatedAt DateTime @updatedAt
+    updatedBy String?
+}
+
+model AppointmentServiceOption {
+    id                   String @id @default(uuid())
+    appointmentServiceId String
+    optionId             String
+
+    appointmentService AppointmentService @relation(fields: [appointmentServiceId], references: [id], onDelete: Cascade)
+    option             Option             @relation(fields: [optionId], references: [id])
+
+    createdAt DateTime @default(now())
+    createdBy String?
+    updatedAt DateTime @updatedAt
+    updatedBy String?
+}
+
+enum Role {
+    ADMIN
+    STAFF
+}
+
+model Staff {
+    id             String  @id @default(uuid())
+    name           String
+    specialization String?
+
+    role         Role          @default(STAFF)
+    appointments Appointment[]
+
+    createdAt DateTime @default(now())
+    createdBy String?
+    updatedAt DateTime @updatedAt
+    updatedBy String?
+}
+
+enum OrderStatus {
+    PENDING
+    PAID
+    CANCELED
+}
+
+enum OrderMethod {
+    CASH
+    CARD
+    ONLINE
+}
+
+model Order {
+    id            String       @id @default(uuid())
+    appointmentId String       @unique
+    amount        Float
+    method        OrderMethod? @default(CASH)
+    status        OrderStatus  @default(PENDING)
+    paidAt        DateTime?
+
+    appointment Appointment @relation(fields: [appointmentId], references: [id])
+
+    createdAt DateTime @default(now())
+    createdBy String?
+    updatedAt DateTime @updatedAt
+    updatedBy String?
+}
+
+model Review {
+    id            String  @id @default(uuid())
+    customerId    String
+    appointmentId String  @unique
+    rating        Int
+    comment       String?
+
+    customer    Customer    @relation(fields: [customerId], references: [id])
+    appointment Appointment @relation(fields: [appointmentId], references: [id])
+
+    createdAt DateTime @default(now())
+    createdBy String?
+    updatedAt DateTime @updatedAt
+    updatedBy String?
+}
