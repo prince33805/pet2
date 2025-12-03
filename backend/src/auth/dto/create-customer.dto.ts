@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, Length } from 'class-validator';
+import { IsNotEmpty, IsString, IsUUID, Length } from 'class-validator';
 
 export class CreateCustomerDto {
   @IsString()
@@ -32,4 +32,28 @@ export class loginCustomerDto {
   @Length(3, 20)
   @IsNotEmpty()
   password: string;
+}
+
+export class CreateStaffDto {
+  @IsString()
+  @Length(3, 20)
+  @IsNotEmpty()
+  name: string;
+
+  @IsString()
+  @Length(3, 20)
+  @IsNotEmpty()
+  email: string;
+
+  @IsString()
+  @Length(3, 20)
+  @IsNotEmpty()
+  password: string;
+
+  @IsString()
+  @IsUUID()
+  @Length(36)
+  @IsNotEmpty()
+  branchId: string;
+
 }

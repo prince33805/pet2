@@ -1,34 +1,50 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, HttpException, HttpStatus, Query } from '@nestjs/common';
 import { AppointmentService } from './appointment.service';
-import { CreateAppointmentDto } from './dto/create-appointment.dto';
+// import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { OrderPayloadDto } from './dto/order-payload.dto';
+import { STAFF } from 'src/common/decorators/staff.decorator';
 
 @Controller('appointment')
 export class AppointmentController {
   constructor(private readonly appointmentService: AppointmentService) { }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
+  @STAFF()
   @Post()
-  async create(@Req() req: any, @Body() createAppointmentDto: CreateAppointmentDto) {
+  async create(@Req() req: any, @Body() body: OrderPayloadDto) {
     try {
       const user = req.user;
-      return await this.appointmentService.create(user, createAppointmentDto);
+      console.log("body",body)
+      // return await this.appointmentService.create(user, createAppointmentDto);
+      return await this.appointmentService.createOrderWithAppointments(user, body);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
+  @STAFF()
   @Get()
-  async findAll() {
+  async findAll(
+    @Query('page') page = '1',
+    @Query('limit') limit = '10',
+    @Query('search') search?: string,
+    @Query('sort') sort: 'asc' | 'desc' = 'desc',) {
     try {
-      return await this.appointmentService.findAll();
+      return await this.appointmentService.findAll({
+        page: Number(page),
+        limit: Number(limit),
+        search,
+        sort,
+      });
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
+  @STAFF()
   @Get(':id')
   async findOne(@Param('id') id: string) {
     try {

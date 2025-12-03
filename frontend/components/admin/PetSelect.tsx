@@ -1,16 +1,18 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { Customer, Pet } from '@/types/models';
-import { useCustomerSearch } from '@/hooks/useCustomerSearch';
+import React from 'react';
+// import { Pet } from '@/types/models';
+// import { useCustomerSearch } from '@/hooks/useCustomerSearch';
 
-export function PetSelect({ customerId, pets, loading, error, onChange }:
-    { customerId?: string | null; pets: Pet[]; loading: boolean; error?: string | null; onChange: (pet: Pet | null) => void }) {
+export function PetSelect(
+    // { customerId, pets, loading, error, onChange }:
+    // { customerId?: string | null; pets: Pet[]; loading: boolean; error?: string | null; onChange: (pet: Pet | null) => void }
+    ) {
 
     return (
         <div>
             <label className="block text-sm md:text-lg mb-2">Pets</label>
-            {loading ? (
+            {/* {loading ? (
                 <div className="text-sm text-slate-500">Loading pets...</div>
             ) : error ? (
                 <div className="text-sm text-red-500">{error}</div>
@@ -26,7 +28,7 @@ export function PetSelect({ customerId, pets, loading, error, onChange }:
                         <option key={p.id} value={p.id}>{p.name} {p.species ? `(${p.species})` : ''}</option>
                     ))}
                 </select>
-            )}
+            )} */}
         </div>
     );
 }

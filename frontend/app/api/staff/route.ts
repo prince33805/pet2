@@ -9,24 +9,6 @@ export async function GET(req: Request) {
             Authorization: token ?? '', // custom header
         },
     });
-    //   const data = await res.json();
-    const data = {
-        data: [
-            {
-                "id": "1",
-                "name": "Alice Johnson",
-                "phone": "555-1234",
-                "role": "Stylist",
-                "hiredDate": "2022-01-15T00:00:00Z"
-            },
-            {
-                "id": "2",
-                "name": "Bob Smith",
-                "phone": "555-5678",
-                "role": "Groomer",
-                "hiredDate": "2021-11-20T00:00:00Z"
-            }
-        ]
-    }
+    const data = await res.json();
     return NextResponse.json(data);
 }

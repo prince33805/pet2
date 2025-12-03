@@ -20,8 +20,12 @@ export class ServiceService {
           },
         });
 
+        // check if createServiceDto.optionService is empty or not
+        if (!createServiceDto.options || createServiceDto.options.length === 0) {
+          return service;
+        }
         const optionServices = await Promise.all(
-          createServiceDto.optionService.map(async (option) => {
+          createServiceDto.options.map(async (option) => {
             return await prisma.option.create({
               data: {
                 name: option.name,
@@ -44,13 +48,45 @@ export class ServiceService {
     }
   }
 
-  async findAll() {
+  async findAll(params: { page?: number; limit?: number; search?: string; sort?: 'asc' | 'desc'; }) {
     try {
-      return await this.prisma.service.findMany({
-        include: {
-          options: true,
+      const { page = 1, limit, search, sort = 'asc' } = params;
+      console.log("param", params)
+      const skip = limit ? (page - 1) * limit : undefined;
+      const take = limit || undefined;
+      const order: any = { name: sort === 'desc' ? 'desc' : 'asc' };
+      const where: any = {};
+      if (search && search.trim() !== '') {
+        const q = search.trim();
+        where.OR = [
+          { name: { contains: q, mode: 'insensitive' } },
+          { options: { some: { name: { contains: q, mode: 'insensitive' } } } }
+        ];
+      }
+      console.log("sort", sort)
+      const [totalCount, services] = await this.prisma.$transaction([
+        this.prisma.service.count({ where }),
+        this.prisma.service.findMany({
+          where,
+          skip,
+          take,
+          orderBy: order,
+          include: {
+            options: true,
+          },
+        }),
+      ]);
+
+      const totalPages = limit ? Math.ceil(totalCount / limit) : 1;
+      return {
+        pagination: {
+          page: limit ? page : 1,
+          limit: limit ?? null,
+          totalCount,
+          totalPages,
         },
-      }); 
+        services,
+      }
     } catch (error) {
       throw new HttpException(`Database query failed: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
     }

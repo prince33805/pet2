@@ -6,12 +6,18 @@ import { useRouter } from "next/navigation"
 // ฟังก์ชัน decode JWT อย่างง่าย (ไม่ต้องใช้ external lib)
 function decodeJWT(token: string) {
   try {
-    const payload = token.split('.')[1]
-    const decoded = JSON.parse(atob(payload))
-    return decoded
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      throw new Error('Invalid token');
+    }
+    // const headerBase64 = parts[0];
+    const payloadBase64 = parts[1];
+    // const header = JSON.parse(atob(headerBase64));
+    const payload = JSON.parse(atob(payloadBase64));
+    return payload;
   } catch (e) {
-    console.error("Invalid token", e)
-    return null
+    console.error("Invalid token", e);
+    return null;
   }
 }
 
@@ -21,12 +27,16 @@ const AdminNavbar = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken')
+    // console.log("token",token)
     if (token) {
       const decoded = decodeJWT(token)
-      // console.log("decoded token:", decoded)
-      if (decoded && decoded.username) {
-        setUsername(decoded.username)
+      console.log("decoded token:", decoded)
+      if (decoded && decoded.name) {
+        setUsername(decoded.name)
       }
+    } else {
+      window.location.href = '/login';
+      throw new Error('Please login')
     }
   }, [])
 

@@ -3,14 +3,14 @@ export interface Service {
   name: string;
   description: string;
   duration: string; // minutes
-  price: number;
+  price: string;
   options?: optionService[];
 }
 
 export interface optionService {
   id: string;
   name: string;
-  price: number
+  price: string
 }
 
 export interface Customer {
@@ -20,6 +20,7 @@ export interface Customer {
   phone: string;
   email?: string;
   address?: string;
+  pets: any[];
   membershipTier?: string;
   totalPoints?: number;
 }
@@ -27,19 +28,22 @@ export interface Customer {
 export interface Order {
   id: string;
   customerName: string;
+  customer?: Customer;
+  staff?: Staff;
   employee: string;
   totalPrice: number;
   totalDuration: number;
   createdAt: string;
+  order:any;
   status: 'Pending' | 'Completed' | 'Cancelled';
 }
 
 export interface Staff {
   id: string;
   name: string;
-  phone: string;
+  phone?: string;
   role: string;
-  hiredDate: string; // ISO date string
+  hiredDate?: string; // ISO date string
 }
 
 export interface Appointment {
@@ -59,11 +63,13 @@ export interface AuthResponse {
 
 export interface Pet {
   id: string;
+  customerId: string;
+  customer?: Customer | null;
   name: string;
   species: string;
   breed: string;
   gender: "MALE" | "FEMALE" | string;
   age: string; // allow string as in example
-  weight: number;
+  weight: string;
   healthNotes?: string;
 }

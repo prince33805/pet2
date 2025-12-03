@@ -14,14 +14,15 @@ export function useServices() {
         try {
             const token = localStorage.getItem('accessToken');
             if (!token) {
-                window.location.href = '/admin/cashier';
+                window.location.href = '/login';
                 throw new Error('Please login')
             };
             const res = await fetch('/api/service', { headers: { Authorization: `Bearer ${token}` } });
             if (!res.ok) throw new Error(await res.text());
             const json = await res.json();
-            const list: Service[] = Array.isArray(json.data) ? json.data : Array.isArray(json) ? json : [];
-            console.log("useServices fetched:", list);
+            console.log("json:", json);
+            const list: Service[] = Array.isArray(json.data.services) ? json.data.services : Array.isArray(json) ? json : [];
+            // console.log("useServices fetched:", list);
             setServices(list);
         } catch (err: any) {
             console.error('useServices:', err);

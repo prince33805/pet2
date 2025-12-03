@@ -7,7 +7,7 @@ import {
   StoreIcon,
   TicketPercentIcon,
 } from 'lucide-react';
-import Image from 'next/image';
+// import Image from 'next/image';
 import Link from 'next/link';
 // import { assets } from "../../assets/assets"
 

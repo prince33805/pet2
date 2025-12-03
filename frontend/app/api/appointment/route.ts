@@ -16,7 +16,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const token = req.headers.get('authorization'); // รับจาก client
   const body = await req.json();
-  console.log("body")
+  console.log("body",body)
   const res = await fetch(`${API_URL}/appointment`, {
     method: 'POST',
     headers: {
@@ -25,6 +25,16 @@ export async function POST(req: Request) {
     },
     body: JSON.stringify(body),
   });
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({ message: "Unknown error" }));
+    console.error("Backend Error:", errorData);
+
+    return NextResponse.json(
+      { error: true, message: errorData.message || "เกิดข้อผิดพลาดจากเซิร์ฟเวอร์" },
+      { status: res.status }
+    );
+  }
+  console.log("res",res)  
   const data = await res.json();
   return NextResponse.json(data);
 }

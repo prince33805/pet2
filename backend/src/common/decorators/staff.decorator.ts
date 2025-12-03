@@ -3,9 +3,9 @@ import { Roles } from './roles.decorator';
 import { RolesGuard } from '../guards/roles.guard';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 
-export function Admin() {
+export function STAFF() {
   return applyDecorators(
-    Roles('admin'),
+    Roles('STAFF'),
     UseGuards(JwtAuthGuard, RolesGuard),
   );
 }

@@ -8,16 +8,16 @@ export function useCustomerSearch() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const customerExample: Customer = {
-        id: '21b10c86-4303-4689-8420-3b46c4d25973',
-        fullname: "John Doe",
-        username: "johndoe",
-        phone: "123-456-7890",
-        email: "mZiZP@example.com",
-        address: "123 Main St, Anytown, USA",
-        membershipTier: "Gold",
-        totalPoints: 1000,
-    };
+    // const customerExample: Customer = {
+    //     id: '21b10c86-4303-4689-8420-3b46c4d25973',
+    //     fullname: "John Doe",
+    //     username: "johndoe",
+    //     phone: "123-456-7890",
+    //     email: "mZiZP@example.com",
+    //     address: "123 Main St, Anytown, USA",
+    //     membershipTier: "Gold",
+    //     totalPoints: 1000,
+    // };
 
     const search = async (q?: string) => {
         if (!q || q.trim().length === 0) { setResults([]); return; }
@@ -37,5 +37,5 @@ export function useCustomerSearch() {
         } finally { setLoading(false); }
     };
 
-    return { results: [customerExample], search, loading, error, setResults };
+    return { results, search, loading, error, setResults };
 }

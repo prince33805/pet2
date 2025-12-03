@@ -11,20 +11,22 @@ export default function LoginPage() {
     e.preventDefault();
 
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('/api/auth/login-staff', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: email, password }),
       });
 
-      if (!res.ok) throw new Error('Login failed');
-      const data = await res.json();
-      // console.log('data', data);
-
-      localStorage.setItem('accessToken', data.data.accessToken);
-      alert('Login success!');
-      // Redirect to admin/cashier page
-      window.location.href = '/admin/cashier';
+      if (!res.ok) {
+        throw new Error('Login failed')
+      } else if (res.ok) {
+        const data = await res.json();
+        // console.log('data', data);
+        localStorage.setItem('accessToken', data.data.accessToken);
+        alert('Login success!');
+        // Redirect to admin/cashier page
+        window.location.href = '/admin/cashier';
+      }
     } catch (err) {
       setError((err as Error).message);
     }
@@ -129,6 +131,7 @@ export default function LoginPage() {
             >
               Log in
             </button>
+            {error && <p className="text-red-500">{error}</p>}
           </form>
         </div>
 
