@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: petdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - internal
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    restart: always
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: "postgresql://postgres:secret@postgres:5432/petdb"
+      # ใส่ env อื่นๆ เช่น JWT_SECRET, NODE_ENV
+      NODE_ENV: production
+    ports:
+      - "127.0.0.1:3000:3000" # bind to localhost : ลูกค้าภายนอกผ่าน nginx เท่านั้น
+    networks:
+      - internal
+
+  nginx:
+    image: nginx:stable
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/certs:/etc/letsencrypt
+      - ./nginx/html:/usr/share/nginx/html:ro
+    depends_on:
+      - backend
+    networks:
+      - external
+      - internal
+
+volumes:
+  pgdata:
+
+networks:
+  internal:
+  external:

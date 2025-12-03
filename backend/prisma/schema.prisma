@@ -18,7 +18,7 @@ model Customer {
     email          String? @unique
     address        String?
     membershipTier String  @default("basic")
-    totalPoints    Float   @default(0)
+    totalPoints    Decimal @db.Decimal(12, 2)
 
     pets        Pet[]
     reviews     Review[]
@@ -41,6 +41,11 @@ model Pet {
     weight      Float
     healthNotes String?
 
+    imageUrl  String? // URL สาธารณะ (เช่น CloudFront หรือ S3 public URL)
+    imageKey  String? @unique // object key ใน S3 (ใช้จัดการลบ/เปลี่ยน)
+    imageMime String?
+    imageSize Int? // byte
+
     customer     Customer      @relation(fields: [customerId], references: [id])
     appointments Appointment[]
 
@@ -48,6 +53,9 @@ model Pet {
     createdBy String?
     updatedAt DateTime @updatedAt
     updatedBy String?
+
+    @@index([customerId])
+    @@index([imageKey])
 }
 
 enum Gender {
@@ -60,7 +68,7 @@ model Service {
     name        String
     description String?
     duration    String
-    price       Float
+    price       Decimal @db.Decimal(12, 2)
 
     options            Option[]
     appointmentService AppointmentService[]
@@ -75,10 +83,10 @@ model Option {
     id          String  @id @default(uuid())
     name        String
     description String?
-    price       Float
+    price       Decimal @db.Decimal(12, 2)
 
     serviceId String
-    service   Service @relation(fields: [serviceId], references: [id])
+    service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
     AppointmentServiceOption AppointmentServiceOption[]
 
@@ -95,35 +103,78 @@ enum BookingStatus {
     CANCELED
 }
 
+model Slot {
+    id           String            @id @default(uuid())
+    date         DateTime // วันที่ของ slot (เก็บเวลาตาม 00:00 ของวันนั้น)
+    startMin     Int // นาทีเริ่ม (จากเที่ยงคืน เช่น 9:00 = 540)
+    endMin       Int
+    capacity     Int // จำนวนคิวที่รับได้
+    remaining    Int // จำนวนคิวที่เหลือ
+    appointments AppointmentSlot[]
+    createdAt    DateTime          @default(now())
+    updatedAt    DateTime          @updatedAt
+
+    @@unique([date, startMin]) // ห้ามซ้ำเวลาเดียวกัน
+}
+
 model Appointment {
-    id         String        @id @default(uuid())
+    id       String        @id @default(uuid())
+    dateTime DateTime
+    status   BookingStatus @default(SCHEDULED)
+
+    order    Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+    customer Customer @relation(fields: [customerId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+    pet      Pet      @relation(fields: [petId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+    staff    Staff?   @relation(fields: [staffId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+    branch   Branch?  @relation(fields: [branchId], references: [id])
+    // slot     Slot?    @relation(fields: [slotId], references: [id])
+
+    orderId    String?
     customerId String
     petId      String
     staffId    String?
-    dateTime   DateTime
-    status     BookingStatus @default(SCHEDULED)
+    branchId   String?
+    // slotId     String?
 
-    customer Customer @relation(fields: [customerId], references: [id])
-    pet      Pet      @relation(fields: [petId], references: [id])
-    staff    Staff?   @relation(fields: [staffId], references: [id])
-
+    appointmentSlots   AppointmentSlot[] // <-- new relation
     appointmentService AppointmentService[]
-    order              Order?
     review             Review?
 
     createdAt DateTime @default(now())
     createdBy String?
     updatedAt DateTime @updatedAt
     updatedBy String?
+
+    // กันซ้ำ: ลูกค้าหรือสัตว์ตัวเดิมจอง slot เดิมซ้ำ
+    // @@unique([slotId, customerId, petId])
+    @@index([orderId])
+    @@index([customerId])
+    @@index([petId])
+    @@index([staffId])
+    @@index([dateTime])
 }
 
-model AppointmentService {
+model AppointmentSlot {
     id            String      @id @default(uuid())
     appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
     appointmentId String
+    slot          Slot        @relation(fields: [slotId], references: [id], onDelete: Cascade)
+    slotId        String
 
-    service   Service @relation(fields: [serviceId], references: [id])
-    serviceId String
+    createdAt DateTime @default(now())
+
+    @@index([appointmentId])
+    @@index([slotId])
+}
+
+model AppointmentService {
+    id             String  @id @default(uuid())
+    appointmentId  String
+    serviceId      String
+    priceAtBooking Decimal @db.Decimal(12, 2)
+
+    appointment Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    service     Service     @relation(fields: [serviceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
     appointmentServiceOption AppointmentServiceOption[]
 
@@ -134,12 +185,13 @@ model AppointmentService {
 }
 
 model AppointmentServiceOption {
-    id                   String @id @default(uuid())
+    id                   String  @id @default(uuid())
     appointmentServiceId String
     optionId             String
+    priceAtBooking       Decimal @db.Decimal(12, 2)
 
-    appointmentService AppointmentService @relation(fields: [appointmentServiceId], references: [id], onDelete: Cascade)
-    option             Option             @relation(fields: [optionId], references: [id])
+    appointmentService AppointmentService @relation(fields: [appointmentServiceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    option             Option             @relation(fields: [optionId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
     createdAt DateTime @default(now())
     createdBy String?
@@ -148,16 +200,34 @@ model AppointmentServiceOption {
 }
 
 enum Role {
-    ADMIN
+    MANAGER
     STAFF
 }
 
 model Staff {
     id             String  @id @default(uuid())
     name           String
+    email          String  @unique
+    password       String
     specialization String?
+    role           Role    @default(STAFF)
+    branchId       String
+    branch         Branch  @relation(fields: [branchId], references: [id])
 
-    role         Role          @default(STAFF)
+    appointments Appointment[]
+
+    createdAt DateTime @default(now())
+    createdBy String?
+    updatedAt DateTime @updatedAt
+    updatedBy String?
+}
+
+model Branch {
+    id           String        @id @default(uuid())
+    name         String
+    location     String?
+    phone        String?
+    staffs       Staff[]
     appointments Appointment[]
 
     createdAt DateTime @default(now())
@@ -179,19 +249,23 @@ enum OrderMethod {
 }
 
 model Order {
-    id            String       @id @default(uuid())
-    appointmentId String       @unique
-    amount        Float
-    method        OrderMethod? @default(CASH)
-    status        OrderStatus  @default(PENDING)
-    paidAt        DateTime?
+    id     String       @id @default(uuid())
+    // appointmentId String       @unique
+    amount Decimal      @db.Decimal(12, 2)
+    method OrderMethod? @default(CASH)
+    status OrderStatus  @default(PENDING)
+    paidAt DateTime?
 
-    appointment Appointment @relation(fields: [appointmentId], references: [id])
+    idempotencyKey String?       @unique
+    appointments   Appointment[]
 
     createdAt DateTime @default(now())
     createdBy String?
     updatedAt DateTime @updatedAt
     updatedBy String?
+
+    @@index([status])
+    @@index([createdAt])
 }
 
 model Review {

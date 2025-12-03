@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString, Length } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, Length, MaxLength, Min } from 'class-validator';
 
 export class CreateServiceDto {
     @IsString()
@@ -7,20 +7,20 @@ export class CreateServiceDto {
     name: string;
 
     @IsString()
-    @Length(3, 50)
+    @MaxLength(500)
     description: string;
 
     @IsString()
-    @Length(3, 10)
+    @Length(2, 3)
     @IsNotEmpty()
     duration: string;
 
     @IsNumber()
     @IsNotEmpty()
+    @Min(1)
     price: number;
 
-    @IsNotEmpty()
-    optionService: OptionService[];
+    options?: OptionService[];
 }
 
 export class OptionService {
