@@ -211,8 +211,8 @@ model Staff {
     password       String
     specialization String?
     role           Role    @default(STAFF)
-    branchId       String
-    branch         Branch  @relation(fields: [branchId], references: [id])
+    branchId       String?
+    branch         Branch?  @relation(fields: [branchId], references: [id])
 
     appointments Appointment[]
 
