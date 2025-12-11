@@ -50,10 +50,4 @@ export class CreateStaffDto {
   @IsNotEmpty()
   password: string;
 
-  @IsString()
-  @IsUUID()
-  @Length(36)
-  @IsNotEmpty()
-  branchId: string;
-
 }
