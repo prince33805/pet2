@@ -9,7 +9,7 @@ export class SlotCron {
   private readonly logger = new Logger(SlotCron.name);
   constructor(private readonly slotService: SlotService) {}
 
-  @Cron('0 0 1 * *', { timeZone: 'Asia/Bangkok' })
+  @Cron('0 1 1 * *', { timeZone: 'Asia/Bangkok' })
   async handleCron() {
     const start = dayjs().format('YYYY-MM-DD');
     this.logger.log(`Generating slots for next 30 days from ${start}`);

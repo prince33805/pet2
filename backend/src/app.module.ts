@@ -10,6 +10,9 @@ import { LoggingMiddleware } from './common/middleware/logging.middleware';
 import { BranchModule } from './branch/branch.module';
 import { StaffModule } from './staff/staff.module';
 import { SlotModule } from './slot/slot.module';
+import { HealthController } from './health/health.controller';
+import { PrismaModule } from './prisma/prisma.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -22,9 +25,11 @@ import { SlotModule } from './slot/slot.module';
     ReviewModule,
     BranchModule,
     StaffModule,
-    SlotModule
+    SlotModule,
+    PrismaModule,
+    ScheduleModule.forRoot()
   ],
-  controllers: [],
+  controllers: [HealthController],
   providers: [],
 })
 export class AppModule implements NestModule {

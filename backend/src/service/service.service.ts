@@ -54,7 +54,7 @@ export class ServiceService {
       console.log("param", params)
       const skip = limit ? (page - 1) * limit : undefined;
       const take = limit || undefined;
-      const order: any = { name: sort === 'desc' ? 'desc' : 'asc' };
+      const order: any = { createdAt: sort === 'desc' ? 'desc' : 'asc' };
       const where: any = {};
       if (search && search.trim() !== '') {
         const q = search.trim();

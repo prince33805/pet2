@@ -14,13 +14,13 @@ import Link from 'next/link';
 const AdminSidebar = () => {
   const pathname = usePathname();
   const sidebarLinks = [
-    { name: 'Dashboard', href: '/admin/dashboard', icon: HomeIcon },
+    { name: 'Dashboard', href: '/', icon: HomeIcon },
     { name: 'Service', href: '/admin/service', icon: StoreIcon },
     { name: 'Cashier', href: '/admin/cashier', icon: TicketPercentIcon },
     { name: 'Order', href: '/admin/order', icon: TicketPercentIcon },
     { name: 'Pet', href: '/admin/pet', icon: TicketPercentIcon },
-    { name: 'Customer', href: '/admin/customer', icon: ShieldCheckIcon },
-    { name: 'Employee', href: '/admin/employee', icon: TicketPercentIcon },
+    { name: 'Customer', href: '/', icon: ShieldCheckIcon },
+    { name: 'Employee', href: '/', icon: TicketPercentIcon },
   ];
   return (
     <div className="inline-flex h-full flex-col gap-5 border-r border-slate-200 sm:min-w-60">
@@ -34,7 +34,7 @@ const AdminSidebar = () => {
           <Link
             key={index}
             href={link.href}
-            className={`relative flex items-center gap-3 text-slate-500 hover:bg-slate-50 p-2.5 transition 
+            className={`relative flex items-center gap-3 text-slate-500 hover:bg-slate-50 p-2.5 transition
                 ${pathname === link.href || pathname.startsWith(link.href + '/') ? 'bg-slate-100 sm:text-slate-600' : ''}
             `}
           >
@@ -43,8 +43,8 @@ const AdminSidebar = () => {
 
             {(pathname === link.href ||
               pathname.startsWith(link.href + '/')) && (
-              <span className="absolute bg-green-500 right-0 top-1.5 bottom-1.5 w-1 sm:w-1.5 rounded-l"></span>
-            )}
+                <span className="absolute bg-green-500 right-0 top-1.5 bottom-1.5 w-1 sm:w-1.5 rounded-l"></span>
+              )}
           </Link>
         ))}
       </div>

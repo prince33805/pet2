@@ -18,6 +18,18 @@ async function bootstrap() {
     app.useGlobalInterceptors(new RequestLoggingInterceptor(), new TransformInterceptor());
 
     app.setGlobalPrefix('api');  // <-- เพิ่มบรรทัดนี้
+
+    app.enableCors({
+      origin: [
+        'https://pet2-sable.vercel.app',
+        // 'https://frontend-uat.vercel.app',
+        // 'https://frontend-prod.vercel.app',
+      ],
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+      credentials: true,
+    });
+
     await app.listen(process.env.PORT ?? 3000);
   }
   catch (err) {

@@ -21,31 +21,6 @@ export default function ServicePage() {
   const [perPage, setPerPage] = useState<number>(10); // ← selectable limit
   const [totalPages, setTotalPages] = useState<number>(1); // ← selectable limit
 
-  // const serviceExample: Service[] = [
-  //   {
-  //     id: '1',
-  //     name: 'Grooming Basic',
-  //     description: 'บริการกรูมมิ่งขั้นพื้นฐาน รวมอาบน้ำ ตัดขน และดูแลสุขภาพทั่วไปของสัตว์เลี้ยง',
-  //     duration: '60',
-  //     price: 800,
-  //     options: [
-  //       { id: '1', name: 'ตัดเล็บ', price: 100 },
-  //       { id: '2', name: 'ทำความสะอาดหู', price: 150 },
-  //     ],
-  //   },
-  //   {
-  //     id: '2',
-  //     name: 'Grooming Premium',
-  //     description: 'บริการกรูมมิ่งระดับพรีเมียม รวมการดูแลขนและผิวหนังอย่างล้ำลึก พร้อมการบำรุงพิเศษ',
-  //     duration: '90',
-  //     price: 1500,
-  //     options: [
-  //       { id: '3', name: 'ทรีทเมนต์บำรุงขน', price: 300 },
-  //       { id: '4', name: 'นวดผ่อนคลาย', price: 250 },
-  //     ],
-  //   },
-  // ];
-
   const apiUrl = useMemo(() => {
     const qs = new URLSearchParams();
     qs.set('page', String(currentPage));
@@ -101,19 +76,6 @@ export default function ServicePage() {
     setCurrentPage(1);
   }, [perPage]);
 
-  // let paginatedServices: Service[] = [];
-  // if (services.length > 0) {
-  //   paginatedServices =
-  //     services.slice(
-  //       (currentPage - 1) * perPage,
-  //       currentPage * perPage,
-  //     );
-  // }
-
-  // const startIndex = (currentPage - 1) * perPage;
-  // const currentServices = services.slice(startIndex, startIndex + perPage);
-  // const totalPages = Math.ceil(services.length / perPage);
-  // const emptyRows = perPage - currentSeserrvices.length;
   const emptyRows = perPage - services.length;
 
   const handleDelete = (id: number) => {
@@ -141,6 +103,11 @@ export default function ServicePage() {
   };
 
   const limits = [5, 10];
+
+  useEffect(() => {
+    console.log('modalMode updated:', modalMode);
+    console.log('activeService updated:', activeService);
+  }, [modalMode, activeService]);
 
   return (
     <div className="text-slate-500 max-w-6xl mx-auto px-4 py-6">
@@ -187,14 +154,6 @@ export default function ServicePage() {
           onChange={(e) => setSearch(e.target.value)}
           className="flex-1 border border-slate-200 rounded-lg p-3 text-sm md:text-lg w-full"
         />
-        {/* <select
-                    value={statusSort}
-                    onChange={(e) => setStatusSort(e.target.value)}
-                    className="border border-slate-200 rounded-lg p-3 text-sm md:text-lg"
-                >
-                    <option value="asc">Ascending</option>
-                    <option value="desc">Descending</option>
-                </select> */}
         <div className="relative w-full md:w-auto">
           <select
             value={statusSort}
@@ -261,13 +220,17 @@ export default function ServicePage() {
                       View
                     </button>
                     <button
-                      className="px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-700 hover:bg-yellow-200 hover:cursor-pointer"
+                      disabled
+                      // hover:cursor-pointer
+                      className="px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-300 hover:bg-yellow-200 disabled:bg-slate-50"
                       onClick={() => openModal('edit', service)}
                     >
                       Edit
                     </button>
                     <button
-                      className="px-3 py-1 rounded-full text-sm bg-red-100 text-red-700 hover:bg-red-200 hover:cursor-pointer"
+                      disabled
+                      // hover:cursor-pointer
+                      className="px-3 py-1 rounded-full text-sm bg-red-100 text-red-300 hover:bg-red-200 disabled:bg-slate-50"
                       onClick={() => handleDelete(Number(service.id))}
                     >
                       Delete
