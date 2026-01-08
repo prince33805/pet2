@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build Docker Image
-        run: docker build -t my-backend:uat .
+        run: docker build -f backend/Dockerfile -t my-backend:uat backend
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.0
