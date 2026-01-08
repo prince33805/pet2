@@ -22,7 +22,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /srv/backend
+            cd /home/ubuntu/pet2
             git pull origin uat
             docker compose pull
             docker compose up -d --build
